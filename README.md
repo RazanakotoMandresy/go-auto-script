@@ -15,3 +15,5 @@ or just build it
 ```bash
 make build
 ```
+
+##### important note this versions of go-auto script doesn't support yet command who need stdin

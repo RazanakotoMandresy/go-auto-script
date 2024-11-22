@@ -10,11 +10,12 @@ import (
 )
 
 func main() {
-	scripts, err := arrScript("script.txt")
+	scriptsListArr, err := arrScript("script.txt")
 	if err != nil {
 		log.Fatalf("arr script error %v \n", err)
 	}
-	cmdExecute(scripts)
+	outputChan := cmdExecute(scriptsListArr)
+	command(outputChan, len(scriptsListArr))
 }
 func arrScript(fileName string) ([]string, error) {
 	var arrCmd []string
@@ -34,7 +35,8 @@ func arrScript(fileName string) ([]string, error) {
 }
 
 // 6313 skf
-func cmdExecute(arrCmd []string) {
+func cmdExecute(arrCmd []string) chan string {
+	cmdChannels := make(chan string, len(arrCmd))
 	for postion, value := range arrCmd {
 		if len(value) < 1 {
 			oneCommand := exec.Command(value)
@@ -42,25 +44,32 @@ func cmdExecute(arrCmd []string) {
 			if oneCommand.Err != nil {
 				fmt.Printf("error during command execution %v", oneCommand.Err)
 			}
-			output, err := oneCommand.Output()
+			output, err := oneCommand.CombinedOutput()
 			if err != nil {
-				fmt.Printf("output error %v", err)
+				fmt.Printf("output error %v 1 \n", err)
 			}
-			fmt.Printf("executing the command number %v , %v \n the result %v \n", postion+1, value, string(output))
+			cmdChannels <- fmt.Sprintf("executing the command number %v , %v \n the result %v \n", postion+1, value, string(output))
 
 		} else {
 			// for command with aruments
 			cmd := strings.Split(value, " ")
 			argsCmd := cmd[:0]
-			oneCommand := exec.Command(cmd[0], argsCmd...)
-			if oneCommand.Err != nil {
-				fmt.Printf("error during command execution %v", oneCommand.Err)
+			multipleCommand := exec.Command(cmd[0], argsCmd...)
+			if multipleCommand.Err != nil {
+				fmt.Printf("error during command execution %v", multipleCommand.Err)
 			}
-			output, err := oneCommand.Output()
+			output, err := multipleCommand.CombinedOutput()
 			if err != nil {
-				fmt.Printf("output error %v", err)
+				fmt.Printf("output error %v 2 \n", err)
 			}
-			fmt.Printf("executing the command number %v , %v \n the result %v \n", postion+1, value, string(output))
+			cmdChannels <- fmt.Sprintf("executing the command number %v , %v \n the result %v \n", postion+1, value, string(output))
 		}
+	}
+	return cmdChannels
+}
+func command(outputsChan chan string, scriptSize int) {
+	for i := 0; i < scriptSize; i++ {
+		output := <-outputsChan
+		fmt.Println(output)
 	}
 }

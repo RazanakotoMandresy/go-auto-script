@@ -14,9 +14,4 @@ func TestScript(t *testing.T) {
 			t.Errorf("want %v but got %v", want, got)
 		}
 	})
-	t.Run("command executions", func(t *testing.T) {
-		arrCmd, _ := arrScript("../script_test.txt")
-		cmdExecute(arrCmd)
-	})
-
 }

@@ -16,9 +16,7 @@ func TestScript(t *testing.T) {
 	})
 	t.Run("command executions", func(t *testing.T) {
 		arrCmd, _ := arrScript("../script_test.txt")
-		if err := cmdExecute(arrCmd); err != nil {
-			t.Errorf("cmdExecute error %v", err)
-		}
+		cmdExecute(arrCmd)
 	})
 
 }

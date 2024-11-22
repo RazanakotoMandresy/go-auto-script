@@ -10,13 +10,11 @@ import (
 )
 
 func main() {
-	scripts, err := arrScript("../script.txt")
+	scripts, err := arrScript("script.txt")
 	if err != nil {
 		log.Fatalf("arr script error %v \n", err)
 	}
-	if err := cmdExecute(scripts); err != nil {
-		log.Fatalf("execut cmd error %v", err)
-	}
+	cmdExecute(scripts)
 }
 func arrScript(fileName string) ([]string, error) {
 	var arrCmd []string
@@ -36,24 +34,33 @@ func arrScript(fileName string) ([]string, error) {
 }
 
 // 6313 skf
-func cmdExecute(arrCmd []string) error {
+func cmdExecute(arrCmd []string) {
 	for postion, value := range arrCmd {
 		if len(value) < 1 {
 			oneCommand := exec.Command(value)
-			fmt.Printf("executing the command number %v , %v \n out %v \n", postion+1, value, oneCommand.String())
+			// fmt.Printf("executing the command number %v , %v \n", postion+1, value)
 			if oneCommand.Err != nil {
-				return fmt.Errorf("error during command execution %v", oneCommand.Err)
+				fmt.Printf("error during command execution %v", oneCommand.Err)
 			}
+			output, err := oneCommand.Output()
+			if err != nil {
+				fmt.Printf("output error %v", err)
+			}
+			fmt.Printf("executing the command number %v , %v \n the result %v \n", postion+1, value, string(output))
+
 		} else {
 			// for command with aruments
 			cmd := strings.Split(value, " ")
 			argsCmd := cmd[:0]
 			oneCommand := exec.Command(cmd[0], argsCmd...)
-			fmt.Printf("executing the command number %v , %v \n out %v \n", postion+1, value, oneCommand.String())
 			if oneCommand.Err != nil {
-				return fmt.Errorf("error during command execution %v", oneCommand.Err)
+				fmt.Printf("error during command execution %v", oneCommand.Err)
 			}
+			output, err := oneCommand.Output()
+			if err != nil {
+				fmt.Printf("output error %v", err)
+			}
+			fmt.Printf("executing the command number %v , %v \n the result %v \n", postion+1, value, string(output))
 		}
 	}
-	return nil
 }
